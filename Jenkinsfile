@@ -19,5 +19,10 @@ pipeline{
                 }
             }
         }
-    }
+        stage('deploy web app'){
+            steps{
+                azureWebAppPublish appName: 'oguzhanaydogan', azureCredentialsId: 'asp', dockerImageName: 'oguzhan.azurecr.io/tetris', dockerImageTag: 'latest', dockerRegistryEndpoint: [], filePath: '', publishType: 'file', resourceGroup: 'Tetris-Jenkins', slotName: '', sourceDirectory: '', targetDirectory: ''
+            }
+        }
+    }    
 }
