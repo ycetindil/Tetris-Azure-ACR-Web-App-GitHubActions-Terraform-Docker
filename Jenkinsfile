@@ -19,7 +19,7 @@ pipeline{
                 }
             }
         }
-        stage('deploy web app'){
+        stage('deploy web appp'){
             steps{
                 sh 'az webapp deployment container config --name oguzhanaydogan --resource-group Tetris-Jenkins --docker-custom-image-name oguzhan.azurecr.io/tetris:latest --sku Free'
             }
