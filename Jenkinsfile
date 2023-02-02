@@ -21,7 +21,7 @@ pipeline{
         }
         stage('deploy web app'){
             steps{
-                azureWebAppPublish appName: 'oguzhanaydogan', azureCredentialsId: 'asp', dockerImageName: 'oguzhan.azurecr.io/tetris', dockerImageTag: 'latest', dockerRegistryEndpoint: [oguzhan.azurecr.io], filePath: '', publishType: 'file', resourceGroup: 'Tetris-Jenkins', slotName: '', sourceDirectory: '', targetDirectory: ''
+                azureWebAppPublish appName: 'oguzhanaydogan', azureCredentialsId: 'asp', dockerImageName: 'oguzhan.azurecr.io/tetris', dockerImageTag: 'latest', dockerRegistryEndpoint: ['oguzhan.azurecr.io'], filePath: '', publishType: 'file', resourceGroup: 'Tetris-Jenkins', slotName: '', sourceDirectory: '', targetDirectory: ''
             }
         }
     }    
