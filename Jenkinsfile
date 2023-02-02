@@ -23,7 +23,9 @@ pipeline{
             steps {
                 script {
                     echo "Installing Azure CLI..."
-                    sh 'curl -sL https://aka.ms/InstallAzureCLIDeb | bash'
+                    sh 'sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc'
+                    sh 'sudo sh -c \'echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo\''
+                    sh 'sudo yum install azure-cli'
                 }
             }
         }
