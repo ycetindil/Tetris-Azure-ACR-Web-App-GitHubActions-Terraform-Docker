@@ -21,6 +21,7 @@ pipeline{
         }
         stage('deploy web appp'){
             steps{
+                azureCLI commands: [[exportVariablesString: '', script: 'az login']], principalCredentialId: 'asp'
                 sh 'az webapp deployment container config --name oguzhanaydogan --resource-group Tetris-Jenkins --docker-custom-image-name oguzhan.azurecr.io/tetris:latest --sku Free'
             }
         }
