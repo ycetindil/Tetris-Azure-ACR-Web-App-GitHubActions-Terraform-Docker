@@ -19,23 +19,14 @@ pipeline{
                 }
             }
         }
-        stage('Install Azure CLI') {
-            steps {
-                script {
-                    echo "Installing Azure CLI..."
-                    sh 'rpm --import https://packages.microsoft.com/keys/microsoft.asc'
-                    sh 'sh -c \'echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo\''
-                    sh 'yum install azure-cli'
-                }
-            }
-        }
         stage('deploy web appp'){
-            agent {
-                label 'azure-cli'
-            }
             steps{
-                azureCLI commands: [[exportVariablesString: '', script: 'az login']], principalCredentialId: 'azure_service_principal'
-                sh 'az webapp deployment container config --name oguzhanaydogan --resource-group Tetris-Jenkins --docker-custom-image-name oguzhan.azurecr.io/tetris:latest --sku Free'
+                withCredentials([azureServicePrincipal('AZURE_SERVICE_PRINCIPAL')]) {
+                sh 'az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}'
+                }
+                withCredentials([usernamePassword(credentialsId: 'acr', passwordVariable: 'password', usernameVariable: 'username')]) {
+                sh 'az webapp config container set --name oguzhanaydogan --resource-group Tetris-Jenkins --docker-custom-image-name oguzhan.azurecr.io/tetris:latest --docker-registry-server-url https://oguzhan.azurecr.io --docker-registry-server-user ${username} --docker-registry-server-password ${password}'
+                }
             }
         }
     }    
