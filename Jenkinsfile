@@ -3,31 +3,31 @@ pipeline{
     stages{
         stage('git checkout'){
             steps{
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/oguzhanaydogan/tetris-java-azure-devops']])
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/ycetindil/Jenkins-Tetris.git']])
             }
         }
-        stage('build Docker image'){
+        stage('build docker image'){
             steps{
-                sh 'docker build -t oguzhan.azurecr.io/tetris .'
+                sh 'docker build -t ycetindil.azurecr.io/tetris .'
             }
         }
         stage('push image'){
             steps{
-                withCredentials([usernamePassword(credentialsId: 'acr', passwordVariable: 'password', usernameVariable: 'username')]) {
-                sh 'docker login -u ${username} -p ${password} oguzhan.azurecr.io'        
-                sh 'docker push oguzhan.azurecr.io/tetris'
+                withCredentials([usernamePassword(credentialsId: 'ACR', passwordVariable: 'password', usernameVariable: 'username')]) {
+                sh 'docker login -u ${username} -p ${password} oguzhan.azurecr.io'
+                sh 'docker push ycetindil.azurecr.io/tetris'
                 }
             }
         }
-        stage('deploy web appp'){
+        stage('deploy web app'){
             steps{
                 withCredentials([azureServicePrincipal('AZURE_SERVICE_PRINCIPAL')]) {
                 sh 'az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}'
                 }
-                withCredentials([usernamePassword(credentialsId: 'acr', passwordVariable: 'password', usernameVariable: 'username')]) {
-                sh 'az webapp config container set --name oguzhanaydogan --resource-group Tetris-Jenkins --docker-custom-image-name oguzhan.azurecr.io/tetris:latest --docker-registry-server-url https://oguzhan.azurecr.io --docker-registry-server-user ${username} --docker-registry-server-password ${password}'
+                withCredentials([usernamePassword(credentialsId: 'ACR', passwordVariable: 'password', usernameVariable: 'username')]) {
+                sh 'az webapp config container set --name ycetindil --resource-group Tetris --docker-custom-image-name ycetindil.azurecr.io/tetris:latest --docker-registry-server-url https://ycetindil.azurecr.io --docker-registry-server-user ${username} --docker-registry-server-password ${password}'
                 }
             }
         }
-    }    
+    }
 }
