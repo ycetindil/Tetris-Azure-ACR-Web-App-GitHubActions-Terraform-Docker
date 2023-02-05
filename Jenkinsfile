@@ -14,7 +14,7 @@ pipeline{
         stage('push image'){
             steps{
                 withCredentials([usernamePassword(credentialsId: 'ACR', passwordVariable: 'password', usernameVariable: 'username')]) {
-                sh 'docker login -u ${username} -p ${password} oguzhan.azurecr.io'
+                sh 'docker login -u ${username} -p ${password} ycetindil.azurecr.io'
                 sh 'docker push ycetindil.azurecr.io/tetris'
                 }
             }
