@@ -28,7 +28,9 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         push: true
-        tags: ${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:${{ github.sha }}
+        tags: |
+          ${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:${{ github.sha }}
+          ${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:latest
   
   deploy:
     
