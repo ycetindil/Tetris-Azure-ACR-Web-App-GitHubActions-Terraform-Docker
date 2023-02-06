@@ -28,4 +28,16 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         push: true
-        tags: ${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:latest
+        tags: ${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:${{ github.sha }}
+  
+  deploy:
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+    
+    - name: Deploy to Azure web app
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'ycetindil'
+        images: '${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:${{ github.sha }}'
