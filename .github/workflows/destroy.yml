@@ -35,4 +35,4 @@ jobs:
         working-directory: ${{ env.TF_FOLDER }}
         run: |
           terraform init
-          terraform destroy -auto-approve
+          terraform destroy -lock=false -auto-approve
