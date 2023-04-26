@@ -24,10 +24,11 @@ GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
 ## Notes
 
+- **Pending Task:** When we create new repository secrets via Terraform, GitHub does not make them available immediately to actions that are triggered by events on the repository. This is because actions run in a separate environment from the Terraform code and the repository secrets are not immediately propagated to that environment.We need to work around this, adding a step to the pipeline that explicitly refreshes the repository secrets.
 - Since GitHub Actions Pipeline uses an ephemeral agent we need to define a backend to keep our `terraform.tfstate`.
 - To use later in the pipeline we define multiple `github_actions_variable`s.
 - Since we have our Terraform configuration files in a dedicated folder, we need to define this path in the job environment for the steps which need to access to this folder to run.
-- Web app needs credentials to access to the ACR.We configure the web app with the below code:
+- Web app needs credentials to access to the ACR. We configure the web app with the below code:
 ```
     - name: 'Set private registry authentication settings'
       run: az webapp config container set --name ${{ vars.WEB_APP_NAME }} --resource-group ${{ vars.RG_NAME }} --docker-registry-server-user ${{ vars.ACR_NAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
