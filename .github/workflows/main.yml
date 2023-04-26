@@ -84,7 +84,7 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
+      
     - name: 'Set private registry authentication settings'
       run: az webapp config container set --name ${{ vars.WEB_APP_NAME }} --resource-group ${{ vars.RG_NAME }} --docker-registry-server-user ${{ vars.ACR_NAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
 
