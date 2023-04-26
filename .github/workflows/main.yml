@@ -44,36 +44,28 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       run: terraform apply -auto-approve
 
-  refresh_repo_vars:
-    name: Refresh repository secrets
-    runs-on: ubuntu-latest
-    needs: terraform
-    env:
-      DUMMY_VAR: ${{ vars.ACR_NAME }}
-    steps:
-  
-    - name: Unset dummy variable
-      run: unset DUMMY_VAR
-
   build_and_push:
     name: 'Build Image and Push to ACR'
     runs-on: ubuntu-latest
-    needs: refresh_repo_vars
+    needs: terraform
+    env:
+      ACR_NAME: ${{ vars.ACR_NAME }}
+      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
     steps:
   
     - name: Login to ACR
       uses: azure/docker-login@v1
       id: dockerlogin
       with:
-        login-server: ${{ vars.ACR_NAME }}.azurecr.io
-        username: ${{ vars.ACR_NAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
+        login-server: ${{ env.ACR_NAME }}.azurecr.io
+        username: ${{ env.ACR_NAME }}
+        password: ${{ env.ACR_PASSWORD }}
 
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
         push: true
-        tags: ${{ vars.ACR_NAME }}.azurecr.io/tetris:${{ github.sha }}
+        tags: ${{ env.ACR_NAME }}.azurecr.io/tetris:${{ github.sha }}
 
   sleep:
     name: 'Sleep'
