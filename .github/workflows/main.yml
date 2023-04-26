@@ -51,7 +51,7 @@ jobs:
     env:
       DUMMY_VAR: ${{ vars.ACR_NAME }}
     steps:
-    
+  
     - name: Unset variables
       run: unset DUMMY_VAR
 
