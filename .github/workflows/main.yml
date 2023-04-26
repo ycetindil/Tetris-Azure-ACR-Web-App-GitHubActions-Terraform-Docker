@@ -44,6 +44,16 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       run: terraform apply -auto-approve
 
+  refresh_repo_vars:
+    name: Refresh repository secrets
+    runs-on: ubuntu-latest
+    env:
+      DUMMY_VAR: ${{ vars.ACR_NAME }}
+    steps:
+    
+    - name: Unset variables
+      run: unset DUMMY_VAR
+
   build_and_push:
     name: 'Build Image and Push to ACR'
     runs-on: ubuntu-latest
