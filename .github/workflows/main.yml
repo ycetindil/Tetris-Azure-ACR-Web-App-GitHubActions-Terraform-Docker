@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: terraform
     env:
-      DUMMY_VAR: ${{ vars.ACR_NAME }}
+      DUMMY_VAR: ${{ secrets.GH_TOKEN }}
     steps:
   
     - name: Unset variables
