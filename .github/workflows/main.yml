@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: refresh_repo_vars
     steps:
-
+  
     - name: Login to ACR
       uses: azure/docker-login@v1
       id: dockerlogin
