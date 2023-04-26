@@ -56,37 +56,37 @@ jobs:
         registry: ${{ vars.ACR_NAME }}.azurecr.io
         username: ${{ vars.ACR_NAME }}
         password: ${{ secrets.ACR_PASSWORD }}
-    
+
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
         push: true
         tags: ${{ vars.ACR_NAME }}.azurecr.io/tetris:${{ github.sha }}
-  
+
   sleep:
     name: 'Sleep'
     runs-on: ubuntu-latest
     needs: build_and_push
     steps:
-    
+
     - name: Sleep for 1 minute
       run: sleep 1m
       shell: bash
-  
+
   deploy:
     name: 'Deploy to Web App'
     runs-on: ubuntu-latest
     needs: sleep
     steps:
-    
+
     - name: 'Login via Azure CLI'
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
+
     - name: 'Set private registry authentication settings'
       run: az webapp config container set --name ${{ vars.WEB_APP_NAME }} --resource-group ${{ vars.RG_NAME }} --docker-registry-server-user ${{ vars.ACR_NAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
-    
+
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
