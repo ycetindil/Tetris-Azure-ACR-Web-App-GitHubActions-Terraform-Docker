@@ -1,4 +1,4 @@
-name: Main
+name: Create Infrastructure and Deploy Web App
 
 on:
   push:
@@ -6,34 +6,77 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  ARM_CLIENT_ID       : "${{ secrets.CLIENT_ID }}"
+  ARM_CLIENT_SECRET   : "${{ secrets.CLIENT_SECRET }}"
+  ARM_SUBSCRIPTION_ID : "${{ secrets.SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID       : "${{ secrets.TENANT_ID }}"
+  TF_FOLDER           : "infra-tf"
+
 jobs:
-  build_and_push:
+  terraform:
+    name: 'Terraform'
     runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
     steps:
-    
+    # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
-    
+
+    # Install the latest version of Terraform CLI
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      working-directory: ${{ env.TF_FOLDER }}
+      run: terraform init
+
+    # On push to "main", build or change infrastructure according to Terraform configuration files
+    - name: Terraform Apply
+      working-directory: ${{ env.TF_FOLDER }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: terraform apply -auto-approve
+
+  build_and_push:
+    name: 'Build Image and Push to ACR'
+    runs-on: ubuntu-latest
+    needs: terraform
+    steps:
+
     - name: Login to ACR
       uses: docker/login-action@v2
       with:
-        registry: ${{ secrets.ACR_USERNAME }}.azurecr.io
-        username: ${{ secrets.ACR_USERNAME }}
+        registry: ${{ vars.ACR_NAME }}.azurecr.io
+        username: ${{ vars.ACR_NAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
         push: true
-        tags: |
-          ${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:${{ github.sha }}
-          ${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:latest
+        tags: ${{ vars.ACR_NAME }}.azurecr.io/tetris:${{ github.sha }}
   
-  deploy:
-    
+  sleep:
+    name: 'Sleep'
     runs-on: ubuntu-latest
     needs: build_and_push
+    steps:
     
+    - name: Sleep for 1 minute
+      run: sleep 1m
+      shell: bash
+  
+  deploy:
+    name: 'Deploy to Web App'
+    runs-on: ubuntu-latest
+    needs: sleep
     steps:
     
     - name: 'Login via Azure CLI'
@@ -42,10 +85,10 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
     - name: 'Set private registry authentication settings'
-      run: az webapp config container set --name ycetindil --resource-group Tetris --docker-registry-server-user ${{ secrets.ACR_USERNAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
+      run: az webapp config container set --name ${{ vars.WEB_APP_NAME }} --resource-group ${{ vars.RG_NAME }} --docker-registry-server-user ${{ vars.ACR_NAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
     
-    - name: Deploy to Azure web app
+    - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'ycetindil'
-        images: '${{ secrets.ACR_USERNAME }}.azurecr.io/tetris:${{ github.sha }}'
+        app-name: ${{ vars.WEB_APP_NAME }}
+        images: ${{ vars.ACR_NAME }}.azurecr.io/tetris:${{ github.sha }}
